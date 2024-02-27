@@ -10,8 +10,7 @@ const app = express();
 
 // Define the port to run the server on
 const PORT = 5000;
-const mongoURI = 'mongodb://localhost:27017/smartHomeDB'; // Replace with your MongoDB connection string
-
+const mongoURI = 'mongodb://127.0.0.1:27017/myNewDatabase';
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -28,6 +27,7 @@ app.get('/', (req, res) => {
 
 // Define a route to get the smart light state
 // Route to get the smart light state
+// Define a route to get the smart light state
 app.get('/api/smart-light', async (req, res) => {
   try {
     const device = await Device.findOne({ name: 'Living Room Light' });
@@ -36,7 +36,8 @@ app.get('/api/smart-light', async (req, res) => {
     }
     res.json(device);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving device', error });
+    console.error(error); // Log the full error
+    res.status(500).json({ message: 'Error retrieving device', error: error.message });
   }
 });
 
@@ -44,6 +45,7 @@ app.get('/api/smart-light', async (req, res) => {
 app.post('/api/smart-light', async (req, res) => {
   try {
     const device = await Device.findOne({ name: 'Living Room Light' });
+    console.log(device); // Add this line
     if (!device) {
       return res.status(404).send('Device not found');
     }
