@@ -1,3 +1,4 @@
+//device.js
 const mongoose = require('mongoose');
 
 // Define the device schema
@@ -10,7 +11,7 @@ const deviceSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['on', 'off']
-  }
+  },
 });
 
 // Create a model from the schema
