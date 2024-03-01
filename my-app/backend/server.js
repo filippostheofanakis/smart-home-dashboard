@@ -3,12 +3,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cors = require('cors')
-;
+const cors = require('cors');
+const axios = require('axios');
 const Device = require('./models/device'); // Import the Device model
 
 // Create an express application
 const app = express();
+
+// Replace with your smart plug's local IP address
+const SMART_PLUG_IP = '192.168.1.123';
 
 // Define the port to run the server on
 const PORT = 5000;
@@ -43,6 +46,31 @@ app.get('/api/smart-light', async (req, res) => {
   }
 });
 
+app.post('/api/smart-plug', async (req, res) => {
+  try {
+    const device = await Device.findOne({ name: 'Smart Plug' });
+    if (!device) {
+      // Return a default response when no device is found
+      return res.status(404).json({ message: 'Device not found' });
+    }
+    device.status = device.status === 'on' ? 'off' : 'on';
+    await device.save();
+
+    // Send a request to the smart plug API to change the plug state
+    const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${device.status}`);
+
+    // Check the response from the smart plug API
+    if (plugResponse.status !== 200) {
+      throw new Error('Failed to update the plug state');
+    }
+
+    res.json(device);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating device', error: error.message });
+  }
+});
+
 // Route to update the smart light state
 app.post('/api/smart-light', async (req, res) => {
   try {
@@ -70,6 +98,51 @@ app.post('/api/devices', async (req, res) => {
     res.status(201).json(device);
   } catch (error) {
     res.status(500).json({ message: 'Error adding device', error });
+  }
+});
+
+// PUT endpoint to toggle a device's status
+app.put('/api/devices/:id/toggle', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    // Find the device by id and update its status
+    const updatedDevice = await Device.findByIdAndUpdate(id, { status }, { new: true });
+
+    if (!updatedDevice) {
+      return res.status(404).json({ message: 'Device not found' });
+    }
+
+    // Make a request to the smart plug API to update the plug status
+    const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${status}`);
+
+    // Check the response from the smart plug API
+    if (plugResponse.status !== 200) {
+      throw new Error('Failed to update the plug state');
+    }
+
+    res.json(updatedDevice);
+  } catch (error) {
+    console.error('Error toggling device status:', error);
+    res.status(500).json({ message: 'Error toggling device status', error: error.message });
+  }
+});
+
+app.post('/api/devices/:deviceId/toggle', async (req, res) => {
+  const { deviceId } = req.params;
+  const device = await findDeviceInDatabase(deviceId); // Custom function to find the device in your DB
+  if (!device) {
+    return res.status(404).send('Device not found');
+  }
+
+  try {
+    // Assuming `toggleDevice` is a function that makes an API call to the smart device
+    const response = await toggleDevice(device.apiIdentifier, req.body.status);
+    res.json(response);
+  } catch (error) {
+    console.error('Error toggling device:', error);
+    res.status(500).send('Failed to toggle device');
   }
 });
 

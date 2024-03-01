@@ -52,6 +52,25 @@ const saveDevice = async (deviceId) => {
   }
 };
 
+    // Fetch all devices from the backend
+    const fetchDevices = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/devices');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+          setDevices(data);
+        
+      } catch (error) {
+        
+          console.error('Error fetching devices:', error);
+          setError(error);
+        
+      }
+    };
+
 
   // Fetch the smart light data from the backend
   useEffect(() => {
@@ -85,24 +104,7 @@ const saveDevice = async (deviceId) => {
       }
     };
   
-    // Fetch all devices from the backend
-    const fetchDevices = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/devices');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (isMounted) {
-          setDevices(data);
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error fetching devices:', error);
-          setError(error);
-        }
-      }
-    };
+
   
     // Execute both fetch requests
     const fetchData = async () => {
@@ -234,6 +236,26 @@ const updateDevice = async (deviceId, updatedName, updatedStatus) => {
   }
 };
 
+const toggleDeviceStatus = async (deviceId, currentStatus) => {
+  try {
+    const newStatus = currentStatus === 'on' ? 'off' : 'on';
+    const response = await fetch(`http://localhost:5000/api/devices/${deviceId}/toggle`, { // Adjust this endpoint as needed
+      method: 'PUT', // Assuming you're using PUT to update the device status
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (!response.ok) throw new Error('Failed to toggle device status');
+
+    const updatedDevice = await response.json();
+    console.log('Updated device:', updatedDevice);
+
+    // Refresh the device list to reflect the change
+    fetchDevices(); // Make sure you have this function implemented
+  } catch (error) {
+    console.error('Error toggling device status:', error);
+  }
+};
+
 
   // Render the component
   if (isLoading) return <div>Loading...</div>;
@@ -286,12 +308,17 @@ const updateDevice = async (deviceId, updatedName, updatedStatus) => {
         <div>
           <span className="Device-name">{device.name} - {device.status}</span>
           <button onClick={() => editDevice(device)}>Edit</button>
+          <button onClick={() => toggleDeviceStatus(device._id, device.status)}>Toggle</button> 
           <button onClick={() => deleteDevice(device._id)} className="Device-button">Delete</button>
         </div>
       )}
     </li>
   ))}
 </ul>
+
+{/* <button onClick={() => toggleDeviceStatus(device.id, !device.isOn)}>
+  {device.isOn ? 'Turn Off' : 'Turn On'}
+</button> */}
 
         {smartLight && (
           <div>
