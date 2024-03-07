@@ -56,13 +56,15 @@ app.post('/api/smart-plug', async (req, res) => {
     device.status = device.status === 'on' ? 'off' : 'on';
     await device.save();
 
-    // Send a request to the smart plug API to change the plug state
-    const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${device.status}`);
 
-    // Check the response from the smart plug API
-    if (plugResponse.status !== 200) {
-      throw new Error('Failed to update the plug state');
-    }
+    // HERE UNCOMMENT FOR REAL IP TESTING
+    // // Send a request to the smart plug API to change the plug state
+    // const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${device.status}`);
+
+    // // Check the response from the smart plug API
+    // if (plugResponse.status !== 200) {
+    //   throw new Error('Failed to update the plug state');
+    // }
 
     res.json(device);
   } catch (error) {
@@ -114,13 +116,17 @@ app.put('/api/devices/:id/toggle', async (req, res) => {
       return res.status(404).json({ message: 'Device not found' });
     }
 
-    // Make a request to the smart plug API to update the plug status
-    const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${status}`);
+     // Here we simulate the toggle operation without making a real network request
+     console.log(`Simulated toggling device ${id} to ${status}`);
 
-    // Check the response from the smart plug API
-    if (plugResponse.status !== 200) {
-      throw new Error('Failed to update the plug state');
-    }
+     // HERE UNCOMMENT FOR REAL IP TESTING
+    // // Make a request to the smart plug API to update the plug status
+    // const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${status}`);
+
+    // // Check the response from the smart plug API
+    // if (plugResponse.status !== 200) {
+    //   throw new Error('Failed to update the plug state');
+    // }
 
     res.json(updatedDevice);
   } catch (error) {

@@ -5,8 +5,6 @@ import React, { useState, useEffect } from 'react';
 // import './App.css';
 import './Dashboard.css';
 
-;
-
 function App() {
   const [smartLight, setSmartLight] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -238,23 +236,37 @@ const updateDevice = async (deviceId, updatedName, updatedStatus) => {
 
 const toggleDeviceStatus = async (deviceId, currentStatus) => {
   try {
+    // Determine the new status based on the current status
     const newStatus = currentStatus === 'on' ? 'off' : 'on';
-    const response = await fetch(`http://localhost:5000/api/devices/${deviceId}/toggle`, { // Adjust this endpoint as needed
-      method: 'PUT', // Assuming you're using PUT to update the device status
+    
+    // Make the API call to toggle the status
+    const response = await fetch(`http://localhost:5000/api/devices/${deviceId}/toggle`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     });
-    if (!response.ok) throw new Error('Failed to toggle device status');
 
+    if (!response.ok) {
+      // If the server responds with an error, handle it appropriately
+      const errorText = await response.text();
+      throw new Error(`Failed to toggle device status: ${errorText}`);
+    }
+
+    // Parse the updated device information from the response
     const updatedDevice = await response.json();
+
+    // Log the updated device for debugging purposes
     console.log('Updated device:', updatedDevice);
 
-    // Refresh the device list to reflect the change
-    fetchDevices(); // Make sure you have this function implemented
+    // Update the devices state to reflect the changed device
+    // This step ensures that the UI will re-render with the updated status
+    setDevices(devices.map(device => device._id === deviceId ? updatedDevice : device));
   } catch (error) {
+    // Log any errors to the console
     console.error('Error toggling device status:', error);
   }
 };
+
 
 
   // Render the component
