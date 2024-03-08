@@ -11,7 +11,7 @@ const Device = require('./models/device'); // Import the Device model
 const app = express();
 
 // Replace with your smart plug's local IP address
-const SMART_PLUG_IP = '192.168.1.123';
+const SMART_PLUG_IP =  'localhost:3001';
 
 // Define the port to run the server on
 const PORT = 5000;
@@ -50,21 +50,18 @@ app.post('/api/smart-plug', async (req, res) => {
   try {
     const device = await Device.findOne({ name: 'Smart Plug' });
     if (!device) {
-      // Return a default response when no device is found
       return res.status(404).json({ message: 'Device not found' });
     }
     device.status = device.status === 'on' ? 'off' : 'on';
     await device.save();
 
+    // Send a request to the mock server to change the plug state
+    const plugResponse = await axios.put(`http://${SMART_PLUG_IP}/smart-plug`, { status: device.status });
 
-    // HERE UNCOMMENT FOR REAL IP TESTING
-    // // Send a request to the smart plug API to change the plug state
-    // const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${device.status}`);
-
-    // // Check the response from the smart plug API
-    // if (plugResponse.status !== 200) {
-    //   throw new Error('Failed to update the plug state');
-    // }
+    // Check the response from the mock server
+    if (plugResponse.status !== 200) {
+      throw new Error('Failed to update the plug state');
+    }
 
     res.json(device);
   } catch (error) {
@@ -116,17 +113,14 @@ app.put('/api/devices/:id/toggle', async (req, res) => {
       return res.status(404).json({ message: 'Device not found' });
     }
 
-     // Here we simulate the toggle operation without making a real network request
-     console.log(`Simulated toggling device ${id} to ${status}`);
 
-     // HERE UNCOMMENT FOR REAL IP TESTING
-    // // Make a request to the smart plug API to update the plug status
-    // const plugResponse = await axios.post(`http://${SMART_PLUG_IP}/${status}`);
+     // Make a request to the smart plug API to update the plug status
+     const plugResponse = await axios.put(`http://${SMART_PLUG_IP}/smart-plug`, { status });
 
-    // // Check the response from the smart plug API
-    // if (plugResponse.status !== 200) {
-    //   throw new Error('Failed to update the plug state');
-    // }
+    // Check the response from the smart plug API
+     if (plugResponse.status !== 200) {
+       throw new Error('Failed to update the plug state');
+     }
 
     res.json(updatedDevice);
   } catch (error) {
