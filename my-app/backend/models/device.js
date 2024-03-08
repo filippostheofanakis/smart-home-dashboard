@@ -1,5 +1,6 @@
 //device.js
-const mongoose = require('mongoose');
+//device.js
+import mongoose from 'mongoose';
 
 // Define the device schema
 const deviceSchema = new mongoose.Schema({
@@ -17,4 +18,4 @@ const deviceSchema = new mongoose.Schema({
 // Create a model from the schema
 const Device = mongoose.model('Device', deviceSchema);
 
-module.exports = Device;
+export { Device };

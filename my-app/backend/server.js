@@ -1,11 +1,11 @@
 //server.js
 // Import the express library
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const axios = require('axios');
-const Device = require('./models/device'); // Import the Device model
+import express from 'express';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import axios from 'axios';
+import {Device }from './models/device.js'; // Make sure to add '.js' extension
 
 // Create an express application
 const app = express();
@@ -199,3 +199,5 @@ app.put('/api/devices/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+export default app; // or 'module.exports = app;' if using CommonJS
