@@ -19,6 +19,8 @@ The Smart Home Dashboard is a cutting-edge full-stack application designed to en
 - **MongoDB Setup**
 Ensure MongoDB is installed and running on your system.
 The application expects a database named smartHomeDB with collections as defined in backend/models.
+- **Testing**: Integrated Mocha for backend testing, ensuring code reliability and performance.
+
 
 
 - **Future Enhancements**
